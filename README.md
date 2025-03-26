@@ -7,4 +7,13 @@ Project Description:
 The goal of this project is to compare two NBA players. More specifically, it will compare the two player's stats when they are both playing and when each of them is not playing. This will allow users to separate how well each player plays when the other is not on the court for fantasy basketball. One use case of this is when a starting player gets hurt. Using this application, a user can see how well the backup player plays when the starter is not playing to see if they are worth rostering or not. 
 
 Project Outline:
+
 Interface plan:
+- We will be using the Tkinter library to create a GUI for the project. It will have a main window to show the application containing multiple dropdowns to search for a given pair of players. THe second window will be a way to edit the points per stat, so it can fit any points scoring system as necessary.
+
+Group Member 1 Plan:
+- 
+
+Group Member 2 Plan:
+- The data analysis will use the numpy module to average and compare the stats of a player when another player is playing and not playing. This will mainly be averages of the stats per game.
+- The visualization will be a series of bar graphs to show the increase/decrease in stats a player has when another player is not playing.
