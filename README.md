@@ -11,9 +11,9 @@ Project Outline:
 Interface plan:
 - We will be using the Tkinter library to create a GUI for the project. It will have a main window to show the application containing multiple dropdowns to search for a given pair of players. THe second window will be a way to edit the points per stat, so it can fit any points scoring system as necessary.
 
-Group Member 1 Plan:
+Group Member 1 Plan (Daniel):
 - 
 
-Group Member 2 Plan:
+Group Member 2 Plan (Jonathan):
 - The data analysis will use the numpy module to average and compare the stats of a player when another player is playing and not playing. This will mainly be averages of the stats per game.
 - The visualization will be a series of bar graphs to show the increase/decrease in stats a player has when another player is not playing.
