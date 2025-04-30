@@ -30,6 +30,9 @@ class Canvas:
         self.frame.columnconfigure(1, weight=1)
         self.frame.columnconfigure(2, weight=1)
         self.frame.columnconfigure(3, weight=1)
+        #self.frame.rowconfigure(0, weight=1)
+        #self.frame.rowconfigure(1, weight=1)
+        self.frame.rowconfigure(2, weight=1)
 
         # Team Selection
         label = ttk.Label(self.frame,
@@ -72,7 +75,7 @@ class Canvas:
         self.player_2_combo_box.grid(column=2, row=1, sticky=(W, E))
 
         generate_button = ttk.Button(self.frame, text="Ok", command=self.generate_data)
-        generate_button.grid(column=3, row=1, sticky=(W, E))
+        generate_button.grid(column=3, row=1, sticky=(N, W, E, S))
 
         # Graphs
         categories = ['With Player', 'Without Player']
@@ -102,7 +105,7 @@ class Canvas:
         self.plt_figure.suptitle("Player Stats", fontsize=16)
 
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(column=0, row=2, columnspan=4)
+        self.canvas.get_tk_widget().grid(column=0, row=2, columnspan=4, sticky=(N, E, S, W))
 
 
 
