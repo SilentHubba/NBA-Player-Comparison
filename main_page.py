@@ -116,6 +116,7 @@ class Canvas:
         selected_roster = commonteamroster.CommonTeamRoster(team_id=team_id, season=season)
         selected_roster_df = selected_roster.get_data_frames()[0]
         players_list = selected_roster_df["PLAYER"].tolist()
+        players_list.sort()
         self.player_1_combo_box.set('')
         self.player_2_combo_box.set('')
         self.player_1_combo_box['values'] = players_list
