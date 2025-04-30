@@ -75,8 +75,8 @@ class Canvas:
         generate_button.grid(column=3, row=1, sticky=(W, E))
 
         # Graphs
-        categories = ['A', 'B', 'C', 'D']
-        values = [23, 17, 35, 29]
+        categories = ['With Player', 'Without Player']
+        values = [0, 0]
 
         plt_figure = Figure()#figsize=(2, 2))
         self.min_subplot = plt_figure.add_subplot(221)
@@ -87,7 +87,18 @@ class Canvas:
         self.pts_subplot.bar(categories, values)
         self.pts_subplot.set_title("Points Per Game")
 
+        self.rebs_subplot = plt_figure.add_subplot(223)
+        self.rebs_subplot.bar(categories, values)
+        self.rebs_subplot.set_title("Rebounds Per Game")
+
+        self.asi_subplot = plt_figure.add_subplot(224)
+        self.asi_subplot.bar(categories, values)
+        self.asi_subplot.set_title("Assists Per Game")
+
         self.canvas = FigureCanvasTkAgg(plt_figure, master=self.frame)
+        # add spacing
+        plt_figure.subplots_adjust(wspace=0.4, hspace=0.4)
+
         self.canvas.draw()
         self.canvas.get_tk_widget().grid(column=0, row=2, columnspan=4)
 
@@ -151,10 +162,25 @@ class Canvas:
         print("Data generated and saved to player_comparison_data.csv")
 
         # ANALYSIS
-        self.calculate_averages(merged, p2_name)
+        self.calculate_averages(merged, p2_name, self.min_subplot, 'MIN', 'Minutes')
+        self.calculate_averages(merged, p2_name, self.pts_subplot, 'PTS', 'Points')
+        self.calculate_averages(merged, p2_name, self.rebs_subplot, 'REB', 'Rebounds')
+        self.calculate_averages(merged, p2_name, self.asi_subplot, 'AST', 'Assists')
 
 
-    def calculate_averages(self, dataframe, p2_name):
+    def calculate_averages(self, dataframe, p2_name, plot, symbol='PTS', stat_name='Points'):
+        with_player_mean = dataframe.loc[dataframe['with_other_player'], symbol].mean()
+        without_player_mean = dataframe.loc[dataframe['with_other_player'] == False, symbol].mean()
+
+        category_names = [stat_name + " with " + p2_name, stat_name + " without " + p2_name]
+        category_values = [with_player_mean, without_player_mean]
+        plot.clear()
+        plot.bar(category_names, category_values)
+        plot.set_title(stat_name + " Per Game")
+        self.canvas.draw()
+
+        # Points
+        """
         points_with_player = dataframe.loc[dataframe['with_other_player'], 'PTS'].mean()
         print(points_with_player)
         points_without_player = dataframe.loc[dataframe['with_other_player'] == False, 'PTS'].mean()
@@ -165,6 +191,7 @@ class Canvas:
         points_vals = [points_with_player, points_without_player]
         self.pts_subplot.bar(pts_cats, points_vals)
         self.canvas.draw()
+        """
 
     
 
