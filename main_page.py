@@ -78,26 +78,28 @@ class Canvas:
         categories = ['With Player', 'Without Player']
         values = [0, 0]
 
-        plt_figure = Figure()#figsize=(2, 2))
-        self.min_subplot = plt_figure.add_subplot(221)
+        self.plt_figure = Figure()#figsize=(2, 2))
+        self.min_subplot = self.plt_figure.add_subplot(221)
         self.min_subplot.bar(categories, values)
         self.min_subplot.set_title("Minutes Per Game")
 
-        self.pts_subplot = plt_figure.add_subplot(222)
+        self.pts_subplot = self.plt_figure.add_subplot(222)
         self.pts_subplot.bar(categories, values)
         self.pts_subplot.set_title("Points Per Game")
 
-        self.rebs_subplot = plt_figure.add_subplot(223)
+        self.rebs_subplot = self.plt_figure.add_subplot(223)
         self.rebs_subplot.bar(categories, values)
         self.rebs_subplot.set_title("Rebounds Per Game")
 
-        self.asi_subplot = plt_figure.add_subplot(224)
+        self.asi_subplot = self.plt_figure.add_subplot(224)
         self.asi_subplot.bar(categories, values)
         self.asi_subplot.set_title("Assists Per Game")
 
-        self.canvas = FigureCanvasTkAgg(plt_figure, master=self.frame)
+        self.canvas = FigureCanvasTkAgg(self.plt_figure, master=self.frame)
         # add spacing
-        plt_figure.subplots_adjust(wspace=0.4, hspace=0.4)
+        self.plt_figure.subplots_adjust(wspace=0.5, hspace=0.5)
+        # add a title
+        self.plt_figure.suptitle("Player Stats", fontsize=16)
 
         self.canvas.draw()
         self.canvas.get_tk_widget().grid(column=0, row=2, columnspan=4)
@@ -136,6 +138,11 @@ class Canvas:
         # Getting player names from dropdown menu
         p1_name = self.player_1_combo_box.get()
         p2_name = self.player_2_combo_box.get()
+
+        if not p1_name or not p2_name:
+            print("missing player")
+            return
+
         # Player name input
         p1_id = self.get_player_id(p1_name)
         p2_id = self.get_player_id(p2_name)
@@ -143,6 +150,7 @@ class Canvas:
         if p1_id == p2_id:
             print("Error: Same Player Selected")
             return
+        
         
         # Fetching logs 
         p1_logs = self.get_game_logs(p1_id)
@@ -162,6 +170,7 @@ class Canvas:
         print("Data generated and saved to player_comparison_data.csv")
 
         # ANALYSIS
+        self.plt_figure.suptitle(p1_name + "'s Stats", fontsize=16)
         self.calculate_averages(merged, p2_name, self.min_subplot, 'MIN', 'Minutes')
         self.calculate_averages(merged, p2_name, self.pts_subplot, 'PTS', 'Points')
         self.calculate_averages(merged, p2_name, self.rebs_subplot, 'REB', 'Rebounds')
@@ -177,21 +186,9 @@ class Canvas:
         plot.clear()
         plot.bar(category_names, category_values)
         plot.set_title(stat_name + " Per Game")
-        self.canvas.draw()
+        plot.tick_params(axis='x', labelrotation=10, labelsize=7)
 
-        # Points
-        """
-        points_with_player = dataframe.loc[dataframe['with_other_player'], 'PTS'].mean()
-        print(points_with_player)
-        points_without_player = dataframe.loc[dataframe['with_other_player'] == False, 'PTS'].mean()
-        print(points_without_player)
-
-        pts_cats = ["Points with " + p2_name, "Points without " + p2_name]
-        self.pts_subplot.clear()
-        points_vals = [points_with_player, points_without_player]
-        self.pts_subplot.bar(pts_cats, points_vals)
         self.canvas.draw()
-        """
 
     
 
