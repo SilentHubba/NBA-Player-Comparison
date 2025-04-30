@@ -6,6 +6,9 @@ from nba_api.stats.static import teams
 from nba_api.stats.endpoints import commonteamroster
 from nba_api.stats.static import players
 from nba_api.stats.endpoints import playergamelog
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 class Canvas:
     def __init__(self, root):
@@ -50,7 +53,7 @@ class Canvas:
 
         # Player 1 Selection
         label = ttk.Label(self.frame,
-                          text="Select Player 1:",
+                          text="Select Active Player:",
                           justify="center")
         label.grid(column=1, row=0, sticky=(W, E))
         label.configure(anchor="center")
@@ -60,7 +63,7 @@ class Canvas:
 
         # Player 2 Selection
         label = ttk.Label(self.frame,
-                          text="Select Player 2:",
+                          text="Select Absent Player:",
                           justify="center")
         label.grid(column=2, row=0, sticky=(W, E))
         label.configure(anchor="center")
@@ -70,6 +73,25 @@ class Canvas:
 
         generate_button = ttk.Button(self.frame, text="Ok", command=self.generate_data)
         generate_button.grid(column=3, row=1, sticky=(W, E))
+
+        # Graphs
+        categories = ['A', 'B', 'C', 'D']
+        values = [23, 17, 35, 29]
+
+        plt_figure = Figure()#figsize=(2, 2))
+        self.min_subplot = plt_figure.add_subplot(221)
+        self.min_subplot.bar(categories, values)
+        self.min_subplot.set_title("Minutes Per Game")
+
+        self.pts_subplot = plt_figure.add_subplot(222)
+        self.pts_subplot.bar(categories, values)
+        self.pts_subplot.set_title("Points Per Game")
+
+        self.canvas = FigureCanvasTkAgg(plt_figure, master=self.frame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().grid(column=0, row=2, columnspan=4)
+
+
 
     def select_team(self, event):
         """
@@ -118,13 +140,33 @@ class Canvas:
         # Merge logs with the other player information
         merged = self.merge_logs(p1_logs, p2_logs)
 
+        print(merged.columns.tolist())
+
         # Filter unneeded data
-        columns_to_keep = ['GAME_DATE', 'MATCHUP', 'PTS', 'REB', 'AST', 'with_other_player']
+        columns_to_keep = ['GAME_DATE', 'MATCHUP', 'MIN', 'PTS', 'REB', 'AST', 'with_other_player']
         merged = merged[columns_to_keep]
 
         # Save to CSV
         merged.to_csv(f'player_comparison_data.csv', index=False)
         print("Data generated and saved to player_comparison_data.csv")
+
+        # ANALYSIS
+        self.calculate_averages(merged, p2_name)
+
+
+    def calculate_averages(self, dataframe, p2_name):
+        points_with_player = dataframe.loc[dataframe['with_other_player'], 'PTS'].mean()
+        print(points_with_player)
+        points_without_player = dataframe.loc[dataframe['with_other_player'] == False, 'PTS'].mean()
+        print(points_without_player)
+
+        pts_cats = ["Points with " + p2_name, "Points without " + p2_name]
+        self.pts_subplot.clear()
+        points_vals = [points_with_player, points_without_player]
+        self.pts_subplot.bar(pts_cats, points_vals)
+        self.canvas.draw()
+
+    
 
 # create a root Tk object
 root = Tk()
