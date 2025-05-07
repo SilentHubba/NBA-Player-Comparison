@@ -9,8 +9,7 @@ from nba_api.stats.endpoints import playergamelog
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-
-class Canvas:
+class MainPage:
     def __init__(self, root):
         root.title("NBA Player Comparison")
 
@@ -21,6 +20,291 @@ class Canvas:
         # change the style
         style = ttk.Style(root)
         style.theme_use('clam')
+
+
+        self.pages = []
+        #classes = [PlayerComparisonPage]
+        #self.pages.append(self.create_player_comparison_page(root))
+        #self.pages.append(self.create_compare_full_team_page(root))
+        self.current_page = None
+
+        #for page in self.pages:
+            #page.grid_configure(row=1)
+
+        self.create_top_bar(root=root)
+        
+        #self.show_page(self.create_player_comparison_page)
+        self.create_player_comparison_page(root)
+
+    def clear_page(self):
+        #print("running", frame)
+        # for page in self.pages:
+        #     page.grid_forget()
+        if self.current_page:
+            self.current_page.grid_forget()
+
+        #frame.tkraise()
+        
+        #self.pages.append(frame())
+
+
+    def create_top_bar(self, root):
+        self.menu = ttk.Frame(root, relief="raised")
+        self.menu.grid(column=0, row=0, sticky=(N, W, E))
+
+        home_button = ttk.Button(self.menu, text="Player Comp", command=lambda: self.create_player_comparison_page(root))
+        home_button.grid(column=0, row=0)
+
+        team_comp_button = ttk.Button(self.menu, text="Player Comp With Team", command=lambda: self.create_compare_full_team_page(root))
+        team_comp_button.grid(column=1, row=0)
+
+        player_season_button = ttk.Button(self.menu, text="Full Player Season", command=lambda: self.create_player_season_page(root))
+        player_season_button.grid(column=2, row=0)
+        """
+        menu = Menu(root)
+
+        page_menu = Menu(menu, tearoff=0)
+        page_menu.add_command(label="Home", command=lambda: self.show_page(self.pages[0]))
+        menu.add_cascade(label="Navigate", menu=page_menu)
+        root.config(menu=menu)
+        """
+
+    def create_player_season_page(self, root):
+        self.clear_page()
+
+        self.player_season_page = ttk.Frame(root, padding="10 10 10 10")
+        self.player_season_page.grid(column=0, row=1, sticky=(W, E, S))
+
+        self.current_page = self.player_season_page
+
+        # FIXME: PUT NEW PAGE HERE
+
+    def create_compare_full_team_page(self, root):
+        # Clear previous page
+        self.clear_page()
+
+
+        self.full_team_page = ttk.Frame(root, padding="10 10 10 10")
+        self.full_team_page.grid(column=0, row=1, sticky=(W, E, S))
+
+        # Set current page so we can remove it
+        self.current_page = self.full_team_page
+
+        self.full_team_page.columnconfigure(0, weight=1)
+        self.full_team_page.columnconfigure(1, weight=1)
+        self.full_team_page.columnconfigure(2, weight=1)
+        self.full_team_page.columnconfigure(3, weight=1)
+
+        self.team_combo_box.grid(column=0, row=1, sticky=(W, E))
+
+        self.team_combo_box.bind("<<ComboboxSelected>>", self.select_team)
+
+        # Player 1 Selection
+        label = ttk.Label(self.full_team_page,
+                          text="Select Active Player:",
+                          justify="center")
+        label.grid(column=0, row=0, sticky=(W, E))
+        label.configure(anchor="center")
+
+        self.player_1_combo_box = ttk.Combobox(self.full_team_page)
+        self.player_1_combo_box.grid(column=1, row=0, sticky=(W, E))
+        return self.full_team_page
+
+    def create_player_comparison_page(self, root):
+        # Clear Current Page
+        self.clear_page()
+        
+        # make a frame for the GUI
+        self.frame = ttk.Frame(root, padding="10 10 10 10")
+        self.frame.grid(column=0, row=1, sticky=(W, E, S))
+
+        # Set current page so we can remove it
+        self.current_page = self.frame
+
+        self.frame.columnconfigure(0, weight=1)
+        self.frame.columnconfigure(1, weight=1)
+        self.frame.columnconfigure(2, weight=1)
+        self.frame.columnconfigure(3, weight=1)
+        #self.frame.rowconfigure(0, weight=1)
+        #self.frame.rowconfigure(1, weight=1)
+        self.frame.rowconfigure(2, weight=1)
+
+        # Team Selection
+        label = ttk.Label(self.frame,
+                          text="Select A Team:",
+                          justify="center")
+        label.grid(column=0, row=0, sticky=(W, E))
+        label.configure(anchor="center")
+
+        team_list = teams.get_teams()
+        self.team_id_dict = {}
+        team_list_dropdown = []
+        for team in team_list:
+            self.team_id_dict[team['full_name']] = team['id']
+            team_list_dropdown.append(team['full_name'])
+
+        team_list_dropdown.sort()
+        self.team_combo_box = ttk.Combobox(self.frame, values=team_list_dropdown)
+        self.team_combo_box.grid(column=0, row=1, sticky=(W, E))
+
+        self.team_combo_box.bind("<<ComboboxSelected>>", self.select_team)
+
+        # Player 1 Selection
+        label = ttk.Label(self.frame,
+                          text="Select Active Player:",
+                          justify="center")
+        label.grid(column=1, row=0, sticky=(W, E))
+        label.configure(anchor="center")
+
+        self.player_1_combo_box = ttk.Combobox(self.frame)
+        self.player_1_combo_box.grid(column=1, row=1, sticky=(W, E))
+
+        # Player 2 Selection
+        label = ttk.Label(self.frame,
+                          text="Select Absent Player:",
+                          justify="center")
+        label.grid(column=2, row=0, sticky=(W, E))
+        label.configure(anchor="center")
+
+        self.player_2_combo_box = ttk.Combobox(self.frame)
+        self.player_2_combo_box.grid(column=2, row=1, sticky=(W, E))
+
+        generate_button = ttk.Button(self.frame, text="Ok", command=self.generate_data)
+        generate_button.grid(column=3, row=1, sticky=(N, W, E, S))
+
+        # Graphs
+        categories = ['With Player', 'Without Player']
+        values = [0, 0]
+
+        self.plt_figure = Figure()#figsize=(2, 2))
+        self.min_subplot = self.plt_figure.add_subplot(221)
+        self.min_subplot.bar(categories, values)
+        self.min_subplot.set_title("Minutes Per Game")
+
+        self.pts_subplot = self.plt_figure.add_subplot(222)
+        self.pts_subplot.bar(categories, values)
+        self.pts_subplot.set_title("Points Per Game")
+
+        self.rebs_subplot = self.plt_figure.add_subplot(223)
+        self.rebs_subplot.bar(categories, values)
+        self.rebs_subplot.set_title("Rebounds Per Game")
+
+        self.asi_subplot = self.plt_figure.add_subplot(224)
+        self.asi_subplot.bar(categories, values)
+        self.asi_subplot.set_title("Assists Per Game")
+
+        self.canvas = FigureCanvasTkAgg(self.plt_figure, master=self.frame)
+        # add spacing
+        self.plt_figure.subplots_adjust(wspace=0.5, hspace=0.5)
+        # add a title
+        self.plt_figure.suptitle("Player Stats", fontsize=16)
+
+        self.canvas.draw()
+        self.canvas.get_tk_widget().grid(column=0, row=2, columnspan=4, sticky=(N, E, S, W))
+
+        return self.frame
+
+
+    def select_team(self, event):
+        """
+        Runs when the user selects a combobox dropdown
+        """
+        print(self.team_combo_box.get())
+        team_id = self.team_id_dict[self.team_combo_box.get()]
+        season = "2024-25"
+        selected_roster = commonteamroster.CommonTeamRoster(team_id=team_id, season=season)
+        selected_roster_df = selected_roster.get_data_frames()[0]
+        players_list = selected_roster_df["PLAYER"].tolist()
+        players_list.sort()
+        self.player_1_combo_box.set('')
+        self.player_2_combo_box.set('')
+        self.player_1_combo_box['values'] = players_list
+        self.player_2_combo_box['values'] = players_list
+
+    def get_player_id(self, name):
+        matches = players.find_players_by_full_name(name)
+        return matches[0]['id'] if matches else None
+
+    def get_game_logs(self, player_id):
+        logs = playergamelog.PlayerGameLog(player_id=player_id, season='2024').get_data_frames()[0]
+        logs['GAME_DATE'] = pd.to_datetime(logs['GAME_DATE'])
+        return logs
+
+    def merge_logs(self, player1_logs, player2_logs):
+        player1_logs['with_other_player'] = player1_logs['GAME_DATE'].isin(player2_logs['GAME_DATE'])
+        return player1_logs
+
+    def generate_data(self):
+        # Getting player names from dropdown menu
+        p1_name = self.player_1_combo_box.get()
+        p2_name = self.player_2_combo_box.get()
+
+        if not p1_name or not p2_name:
+            print("missing player")
+            return
+
+        # Player name input
+        p1_id = self.get_player_id(p1_name)
+        p2_id = self.get_player_id(p2_name)
+
+        if p1_id == p2_id:
+            print("Error: Same Player Selected")
+            return
+        
+        
+        # Fetching logs 
+        p1_logs = self.get_game_logs(p1_id)
+        p2_logs = self.get_game_logs(p2_id)
+
+        # Merge logs with the other player information
+        merged = self.merge_logs(p1_logs, p2_logs)
+
+        print(merged.columns.tolist())
+
+        # Filter unneeded data
+        columns_to_keep = ['GAME_DATE', 'MATCHUP', 'MIN', 'PTS', 'REB', 'AST', 'with_other_player']
+        merged = merged[columns_to_keep]
+
+        # Save to CSV
+        merged.to_csv(f'player_comparison_data.csv', index=False)
+        print("Data generated and saved to player_comparison_data.csv")
+
+        # ANALYSIS
+        self.plt_figure.suptitle(p1_name + "'s Stats", fontsize=16)
+        self.calculate_averages(merged, p2_name, self.min_subplot, 'MIN', 'Minutes')
+        self.calculate_averages(merged, p2_name, self.pts_subplot, 'PTS', 'Points')
+        self.calculate_averages(merged, p2_name, self.rebs_subplot, 'REB', 'Rebounds')
+        self.calculate_averages(merged, p2_name, self.asi_subplot, 'AST', 'Assists')
+
+
+    def calculate_averages(self, dataframe, p2_name, plot, symbol='PTS', stat_name='Points'):
+        with_player_mean = dataframe.loc[dataframe['with_other_player'], symbol].mean()
+        without_player_mean = dataframe.loc[dataframe['with_other_player'] == False, symbol].mean()
+
+        category_names = [stat_name + " with " + p2_name, stat_name + " without " + p2_name]
+        category_values = [with_player_mean, without_player_mean]
+        plot.clear()
+        plot.bar(category_names, category_values)
+        plot.set_title(stat_name + " Per Game")
+        plot.tick_params(axis='x', labelrotation=10, labelsize=7)
+
+        self.canvas.draw()
+
+    
+
+class PlayerComparisonPage:
+    def __init__(self, root):
+        """
+        root.title("NBA Player Comparison")
+
+        # Configure the root so that it stretches in all directions
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+
+        # change the style
+        style = ttk.Style(root)
+        style.theme_use('clam')
+        """
 
         # make a frame for the GUI
         self.frame = ttk.Frame(root, padding="10 10 10 10")
@@ -197,10 +481,14 @@ class Canvas:
     
 
 # create a root Tk object
-root = Tk()
+#root = Tk()
 
 # create a Canvas object with the Tk root object as an argument
-canvas = Canvas(root)
+#canvas = PlayerComparisonPage(root)
 
 # call the mainloop method on the Tk root object
+#root.mainloop()
+
+root = Tk()
+main_page = MainPage(root)
 root.mainloop()
