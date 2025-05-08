@@ -108,8 +108,7 @@ class MainPage:
         self.team_combo_box.bind("<<ComboboxSelected>>", self.select_team)
 
         # Current Player Selection Field
-        # Why does this not work before selecting a team in Player Comp With Team????
-        # SOS biggest bug ever
+        # Why does this need a team to be selected from Player Comparison w/ Team???? HELP.
         label = ttk.Label(self.player_season_page,
                           text="Select Player:",
                           justify="center")
@@ -154,7 +153,7 @@ class MainPage:
         return self.player_season_page
 
 
-######################################################################################################
+
     def create_compare_full_team_page(self, root):
         # Clear previous page
         self.clear_page()
@@ -491,43 +490,46 @@ class MainPage:
         p4_logs = p4_logs.sort_values('GAME_DATE')
         dates = p4_logs['GAME_DATE'].dt.strftime('%Y-%m-%d')
 
-        # Update plots
-        self.plt_figure.suptitle(f"{p4_name}'s Season Stats", fontsize=16)
+        window_size = 5  # Adjust the window size for trend
+        #Calculate trends for each seasonal stat
+        p4_logs['MIN_MA'] = p4_logs['MIN'].rolling(window=window_size).mean()
+        p4_logs['PTS_MA'] = p4_logs['PTS'].rolling(window=window_size).mean()
+        p4_logs['REB_MA'] = p4_logs['REB'].rolling(window=window_size).mean()
+        p4_logs['AST_MA'] = p4_logs['AST'].rolling(window=window_size).mean()
 
-        # Minutes plot
+        # Minutes trend plot
         self.min_subplot.clear()
-        self.min_subplot.plot(p4_logs['MIN'], marker='o', linestyle='-')
-        self.min_subplot.set_title("Minutes Over Games")
-        self.min_subplot.set_xlabel("Games")
+        self.min_subplot.plot(p4_logs['MIN_MA'], marker='', linestyle='-', color='blue')
+        self.min_subplot.set_title("Minutes over Season")
+        self.min_subplot.set_xlabel("Games sorted by Date")
         self.min_subplot.set_ylabel("Minutes")
         self.min_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
+        
 
-        # Points plot
+        # Points trend plot
         self.pts_subplot.clear()
-        self.pts_subplot.plot(p4_logs['PTS'], marker='o', linestyle='-')
-        self.pts_subplot.set_title("Points Over Games")
-        self.pts_subplot.set_xlabel("Games")
+        self.pts_subplot.plot(p4_logs['PTS_MA'], marker='', linestyle='-', color='blue')
+        self.pts_subplot.set_title("Points over Season")
+        self.pts_subplot.set_xlabel("Games sorted by Date")
         self.pts_subplot.set_ylabel("Points")
         self.pts_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
 
-        # Rebounds plot
+        # Rebounds ptrend lot
         self.rebs_subplot.clear()
-        self.rebs_subplot.plot(p4_logs['REB'], marker='o', linestyle='-')
-        self.rebs_subplot.set_title("Rebounds Over Games")
-        self.rebs_subplot.set_xlabel("Games")
+        self.rebs_subplot.plot(p4_logs['REB_MA'], marker='', linestyle='-', color='blue')
+        self.rebs_subplot.set_title("Rebounds over Season")
+        self.rebs_subplot.set_xlabel("Games sorted by Date")
         self.rebs_subplot.set_ylabel("Rebounds")
         self.rebs_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
 
-        # Assists plot
+        # Assists trend plot
         self.asi_subplot.clear()
-        self.asi_subplot.plot(p4_logs['AST'], marker='o', linestyle='-')
-        self.asi_subplot.set_title("Assists Over Games")
-        self.asi_subplot.set_xlabel("Games")
+        self.asi_subplot.plot(p4_logs['AST_MA'], marker='', linestyle='-', color='blue')
+        self.asi_subplot.set_title("Assists over Season")
+        self.asi_subplot.set_xlabel("Games sorted by Date")
         self.asi_subplot.set_ylabel("Assists")
         self.asi_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
-
-        # Adjust layout and redraw
-        self.plt_figure.subplots_adjust(wspace=0.5, hspace=0.5)
+        
         self.canvas.draw()
 
 
