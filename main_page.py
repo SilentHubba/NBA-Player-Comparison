@@ -72,15 +72,89 @@ class MainPage:
         """
 
     def create_player_season_page(self, root):
+        # Clear Current Page
         self.clear_page()
-
+        # Make frame for GUI
         self.player_season_page = ttk.Frame(root, padding="10 10 10 10")
         self.player_season_page.grid(column=0, row=1, sticky=(N, W, E, S))
 
         self.current_page = self.player_season_page
 
-        # FIXME: PUT NEW PAGE HERE
+        self.player_season_page.columnconfigure(0, weight=1)
+        self.player_season_page.columnconfigure(1, weight=1)
+        self.player_season_page.columnconfigure(2, weight=1)
+        self.player_season_page.columnconfigure(3, weight=1)
+        self.player_season_page.rowconfigure(2, weight=1)
 
+        
+        # Team Selection
+        label = ttk.Label(self.player_season_page,
+                          text="Select A Team:",
+                          justify="center")
+        label.grid(column=0, row=0, sticky=(W, E))
+        label.configure(anchor="center")
+
+        team_list = teams.get_teams()
+        self.team_id_dict = {}
+        self.team_list_dropdown = []
+        for team in team_list:
+            self.team_id_dict[team['full_name']] = team['id']
+            self.team_list_dropdown.append(team['full_name'])
+
+        self.team_list_dropdown.sort()
+        self.team_combo_box = ttk.Combobox(self.player_season_page, values=self.team_list_dropdown)
+        self.team_combo_box.grid(column=0, row=1, sticky=(W, E))
+
+        self.team_combo_box.bind("<<ComboboxSelected>>", self.select_team)
+
+        # Current Player Selection Field
+        # Why does this not work before selecting a team in Player Comp With Team????
+        # SOS biggest bug ever
+        label = ttk.Label(self.player_season_page,
+                          text="Select Player:",
+                          justify="center")
+        label.grid(column=1, row=0, sticky=(W, E))
+        label.configure(anchor="center")
+
+        self.player_combo_box = ttk.Combobox(self.player_season_page)
+        self.player_combo_box.grid(column=1, row=1, sticky=(W, E))
+
+        # Ok Button
+        generate_button = ttk.Button(self.player_season_page, text="Ok", command=self.generate_season_data)
+        generate_button.grid(column=2, row=1, sticky=(N, W, E, S))
+
+        # Graphs
+        self.plt_figure = Figure()
+        self.min_subplot = self.plt_figure.add_subplot(221)
+        self.min_subplot.plot([], [])
+        self.min_subplot.set_title("Minutes Per Game")
+
+        self.pts_subplot = self.plt_figure.add_subplot(222)
+        self.pts_subplot.plot([], [])
+        self.pts_subplot.set_title("Points Per Game")
+
+        self.rebs_subplot = self.plt_figure.add_subplot(223)
+        self.rebs_subplot.plot([], [])
+        self.rebs_subplot.set_title("Rebounds Per Game")
+
+        self.asi_subplot = self.plt_figure.add_subplot(224)
+        self.asi_subplot.plot([], [])
+        self.asi_subplot.set_title("Assists Per Game")
+
+        self.canvas = FigureCanvasTkAgg(self.plt_figure, master=self.player_season_page)
+        # add spacing
+        self.plt_figure.subplots_adjust(wspace=0.5, hspace=0.5)
+        # add a title
+        self.plt_figure.suptitle("Player Stats", fontsize=16)
+        
+
+        self.canvas.draw()
+        self.canvas.get_tk_widget().grid(column=0, row=2, columnspan=3, sticky=(N, E, S, W))
+
+        return self.player_season_page
+
+
+######################################################################################################
     def create_compare_full_team_page(self, root):
         # Clear previous page
         self.clear_page()
@@ -272,6 +346,9 @@ class MainPage:
         elif self.current_page == self.full_team_page:
             self.player_3_combo_box.set('')
             self.player_3_combo_box['values'] = players_list
+        elif self.current_page == self.player_season_page:
+            self.player_combo_box.set('')
+            self.player_combo_box['values'] = players_list
 
     def get_player_id(self, name):
         matches = players.find_players_by_full_name(name)
@@ -387,6 +464,74 @@ class MainPage:
         self.pts_rebs_ast_plot.set_ylabel("Pts+Rebs+Ast Without " + player_name)
         self.pts_rebs_ast_plot.grid(True)
         self.canvas.draw()
+    
+    def generate_season_data(self):
+        # Getting player name from dropdown menu
+        p4_name = self.player_combo_box.get()
+
+        if not p4_name:
+            print("missing player")
+            return
+
+        # Player name input
+        p4_id = self.get_player_id(p4_name)
+        
+        # Fetching logs 
+        p4_logs = self.get_game_logs(p4_id)
+
+        # Filter unneeded data
+        columns_to_keep = ['GAME_DATE', 'MIN', 'PTS', 'REB', 'AST']
+        p4_logs = p4_logs[columns_to_keep]
+
+        # Save to CSV
+        p4_logs.to_csv(f'player_seasonal_data.csv', index=False)
+        print("Data generated and saved to player_seasonal_data.csv")
+
+        # Sort data by date
+        p4_logs = p4_logs.sort_values('GAME_DATE')
+        dates = p4_logs['GAME_DATE'].dt.strftime('%Y-%m-%d')
+
+        # Update plots
+        self.plt_figure.suptitle(f"{p4_name}'s Season Stats", fontsize=16)
+
+        # Minutes plot
+        self.min_subplot.clear()
+        self.min_subplot.plot(p4_logs['MIN'], marker='o', linestyle='-')
+        self.min_subplot.set_title("Minutes Over Games")
+        self.min_subplot.set_xlabel("Games")
+        self.min_subplot.set_ylabel("Minutes")
+        self.min_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
+
+        # Points plot
+        self.pts_subplot.clear()
+        self.pts_subplot.plot(p4_logs['PTS'], marker='o', linestyle='-')
+        self.pts_subplot.set_title("Points Over Games")
+        self.pts_subplot.set_xlabel("Games")
+        self.pts_subplot.set_ylabel("Points")
+        self.pts_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
+
+        # Rebounds plot
+        self.rebs_subplot.clear()
+        self.rebs_subplot.plot(p4_logs['REB'], marker='o', linestyle='-')
+        self.rebs_subplot.set_title("Rebounds Over Games")
+        self.rebs_subplot.set_xlabel("Games")
+        self.rebs_subplot.set_ylabel("Rebounds")
+        self.rebs_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
+
+        # Assists plot
+        self.asi_subplot.clear()
+        self.asi_subplot.plot(p4_logs['AST'], marker='o', linestyle='-')
+        self.asi_subplot.set_title("Assists Over Games")
+        self.asi_subplot.set_xlabel("Games")
+        self.asi_subplot.set_ylabel("Assists")
+        self.asi_subplot.tick_params(axis='x', labelrotation=45, labelsize=7)
+
+        # Adjust layout and redraw
+        self.plt_figure.subplots_adjust(wspace=0.5, hspace=0.5)
+        self.canvas.draw()
+
+
+
 
     def graph_pts_rebs_ast(self, dataframe, p1_name, plot):
         stats = ['PTS', 'REB', 'AST']
