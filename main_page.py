@@ -54,11 +54,11 @@ class MainPage:
         self.menu.grid(column=0, row=0, sticky=(W, E))
 
         # Add a button for the first page
-        home_button = ttk.Button(self.menu, text="Player Comp", command=lambda: self.create_player_comparison_page(root))
+        home_button = ttk.Button(self.menu, text="Two Player Comp.", command=lambda: self.create_player_comparison_page(root))
         home_button.grid(column=0, row=0)
 
         # Add a button for the second page
-        team_comp_button = ttk.Button(self.menu, text="Player Comp With Team", command=lambda: self.create_compare_full_team_page(root))
+        team_comp_button = ttk.Button(self.menu, text="Full Team Comp.", command=lambda: self.create_compare_full_team_page(root))
         team_comp_button.grid(column=1, row=0)
 
         # # Add a button for the third page
