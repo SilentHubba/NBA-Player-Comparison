@@ -14,7 +14,7 @@ import math
 class MainPage:
     def __init__(self, root):
         # Title the window
-        root.title("NBA Player Comparison")
+        root.title("NBA Player Stat Analysis")
 
         # Configure the root so that it stretches in all directions
         root.columnconfigure(0, weight=1)
