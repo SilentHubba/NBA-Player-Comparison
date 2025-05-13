@@ -8,7 +8,7 @@ This project is an app to help users analyze players, specifically targeted to f
 
 Instructions For Installation:
 1. Download main_page.py
-2. Ensure the packages are installed in the python environment.
+2. Ensure the packages are installed in the python environment. This includes numpy, pandas, matplotlib, nba_api, and tkinter.
 3. Run the python file with 'python3 main_page.py' in the terminal or some other method of choice. The program will generate the csv files automatically.
 
 Potential Updates:
