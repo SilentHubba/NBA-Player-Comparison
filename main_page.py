@@ -191,7 +191,7 @@ class MainPage:
 
         # Player Selection Field
         label = ttk.Label(self.full_team_page,
-                          text="Select Injured/Absent Player:",
+                          text="Select Inactive Player:",
                           justify="center")
         label.grid(column=1, row=0, sticky=(W, E))
         label.configure(anchor="center")
@@ -290,7 +290,7 @@ class MainPage:
 
         # Player 2 Selection label and combo box
         label = ttk.Label(self.frame,
-                          text="Select Absent Player:",
+                          text="Select Inactive Player:",
                           justify="center")
         label.grid(column=2, row=0, sticky=(W, E))
         label.configure(anchor="center")
